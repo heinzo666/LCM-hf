@@ -35,7 +35,7 @@ MAX_IMAGE_SIZE = int(os.getenv("MAX_IMAGE_SIZE", "768"))
 USE_TORCH_COMPILE = os.getenv("USE_TORCH_COMPILE") == "1"
 DTYPE = torch.float32  # torch.float16 works as well, but pictures seem to be a bit worse
 
-pipe = DiffusionPipeline.from_pretrained("sinkinai/Beautiful-Realistic-Asians-v5")
+pipe = DiffusionPipeline.from_pretrained("sinkinai/Beautiful-Realistic-Asians-v5", custom_pipeline="latent_consistency_txt2img", custom_revision="main")
 pipe.to(torch_device="cuda", torch_dtype=DTYPE)
 
 
@@ -63,7 +63,6 @@ def generate(
     guidance_scale: float = 8.0,
     num_inference_steps: int = 4,
     num_images: int = 4,
-    lora_path = "nemesis1/ShaniJKT48"
     lora_weight: int = 1,
     randomize_seed: bool = False,
     progress = gr.Progress(track_tqdm=True)
@@ -72,6 +71,7 @@ def generate(
     torch.manual_seed(seed)
     start_time = time.time()
     pipe.load_lora_weights(lora_path)
+    lora_path = "nemesis1/ShaniJKT48"
     lora_weight = 0.5
     result = pipe(
         prompt=prompt,
