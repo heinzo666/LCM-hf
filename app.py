@@ -168,7 +168,7 @@ with gr.Blocks(css="style.css") as demo:
             lora_path = gr.Dropdown([
                 "nemesis1/ShaniJKT48",
                 "nemesis1/GraciaJKT48",
-            ]
+            ],
                 label="Pilih LoRa",
                 value="nemesis1/ShaniJKT48",
             )
