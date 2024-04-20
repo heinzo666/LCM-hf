@@ -63,12 +63,16 @@ def generate(
     guidance_scale: float = 8.0,
     num_inference_steps: int = 4,
     num_images: int = 4,
+    lora_path = "nemesis1/ShaniJKT48"
+    lora_weight: int = 1,
     randomize_seed: bool = False,
     progress = gr.Progress(track_tqdm=True)
 ) -> PIL.Image.Image:
     seed = randomize_seed_fn(seed, randomize_seed)
     torch.manual_seed(seed)
     start_time = time.time()
+    pipe.load_lora_weights(lora_path)
+    lora_weight = 0.5
     result = pipe(
         prompt=prompt,
         width=width,
@@ -78,7 +82,9 @@ def generate(
         num_images_per_prompt=num_images,
         lcm_origin_steps=50,
         output_type="pil",
+        cross_attention_kwargs={"scale": lora_weight},
     ).images
+    pipe.unload_lora_weights()
     paths = save_images(result)
     print(time.time() - start_time)
     return paths, seed
@@ -157,7 +163,21 @@ with gr.Blocks(css="style.css") as demo:
                 maximum=8,
                 step=1,
                 value=4,
-                visible=False,
+            )
+        with gr.Row():
+            lora_path = gr.Dropdown([
+                "nemesis1/ShaniJKT48",
+                "nemesis1/GraciaJKT48",
+            ]
+                label="Pilih LoRa",
+                value="nemesis1/ShaniJKT48",
+            )
+            lora_weight = gr.Slider(
+                label="Kekuatan LoRa",
+                minimum=0,
+                maximum=1,
+                step=0.05,
+                value=1,
             )
 
     gr.Examples(
